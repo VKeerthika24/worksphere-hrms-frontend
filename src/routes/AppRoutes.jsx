@@ -2,8 +2,10 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
-import ProtectedRoute from "./ProtectedRoute";
 import Dashboard from "../pages/dashboard/Dashboard";
+
+import ProtectedRoute from "./ProtectedRoute";
+import MainLayout from "../components/layout/MainLayout";
 
 function Employees() {
     return <h2>Employees Page</h2>;
@@ -38,34 +40,40 @@ function AppRoutes() {
                 element={<Register />}
             />
 
-            {/* Protected Routes */}
+            {/* Protected Application */}
 
             <Route element={<ProtectedRoute />}>
 
                 <Route
-                    path="/dashboard"
-                    element={<Dashboard />}
-                />
+                    element={<MainLayout />}
+                >
 
-                <Route
-                    path="/employees"
-                    element={<Employees />}
-                />
+                    <Route
+                        path="/dashboard"
+                        element={<Dashboard />}
+                    />
 
-                <Route
-                    path="/departments"
-                    element={<Departments />}
-                />
+                    <Route
+                        path="/employees"
+                        element={<Employees />}
+                    />
 
-                <Route
-                    path="/attendance"
-                    element={<Attendance />}
-                />
+                    <Route
+                        path="/departments"
+                        element={<Departments />}
+                    />
 
-                <Route
-                    path="/leaves"
-                    element={<Leaves />}
-                />
+                    <Route
+                        path="/attendance"
+                        element={<Attendance />}
+                    />
+
+                    <Route
+                        path="/leaves"
+                        element={<Leaves />}
+                    />
+
+                </Route>
 
             </Route>
 
