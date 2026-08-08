@@ -2,10 +2,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
-
-function Dashboard() {
-    return <h2>Dashboard Page</h2>;
-}
+import ProtectedRoute from "./ProtectedRoute";
+import Dashboard from "../pages/dashboard/Dashboard";
 
 function Employees() {
     return <h2>Employees Page</h2>;
@@ -24,8 +22,11 @@ function Leaves() {
 }
 
 function AppRoutes() {
+
     return (
         <Routes>
+
+            {/* Public Routes */}
 
             <Route
                 path="/login"
@@ -37,30 +38,38 @@ function AppRoutes() {
                 element={<Register />}
             />
 
-            <Route
-                path="/dashboard"
-                element={<Dashboard />}
-            />
+            {/* Protected Routes */}
 
-            <Route
-                path="/employees"
-                element={<Employees />}
-            />
+            <Route element={<ProtectedRoute />}>
 
-            <Route
-                path="/departments"
-                element={<Departments />}
-            />
+                <Route
+                    path="/dashboard"
+                    element={<Dashboard />}
+                />
 
-            <Route
-                path="/attendance"
-                element={<Attendance />}
-            />
+                <Route
+                    path="/employees"
+                    element={<Employees />}
+                />
 
-            <Route
-                path="/leaves"
-                element={<Leaves />}
-            />
+                <Route
+                    path="/departments"
+                    element={<Departments />}
+                />
+
+                <Route
+                    path="/attendance"
+                    element={<Attendance />}
+                />
+
+                <Route
+                    path="/leaves"
+                    element={<Leaves />}
+                />
+
+            </Route>
+
+            {/* Unknown URL */}
 
             <Route
                 path="*"
