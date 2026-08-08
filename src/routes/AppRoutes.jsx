@@ -1,12 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
-function Login() {
-    return <h2>Login Page</h2>;
-}
-
-function Register() {
-    return <h2>Register Page</h2>;
-}
+import Login from "../pages/auth/Login";
+import Register from "../pages/auth/Register";
 
 function Dashboard() {
     return <h2>Dashboard Page</h2>;
@@ -32,18 +27,41 @@ function AppRoutes() {
     return (
         <Routes>
 
-            {/* Authentication */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route
+                path="/login"
+                element={<Login />}
+            />
 
-            {/* Main Application */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/employees" element={<Employees />} />
-            <Route path="/departments" element={<Departments />} />
-            <Route path="/attendance" element={<Attendance />} />
-            <Route path="/leaves" element={<Leaves />} />
+            <Route
+                path="/register"
+                element={<Register />}
+            />
 
-            {/* Unknown URL */}
+            <Route
+                path="/dashboard"
+                element={<Dashboard />}
+            />
+
+            <Route
+                path="/employees"
+                element={<Employees />}
+            />
+
+            <Route
+                path="/departments"
+                element={<Departments />}
+            />
+
+            <Route
+                path="/attendance"
+                element={<Attendance />}
+            />
+
+            <Route
+                path="/leaves"
+                element={<Leaves />}
+            />
+
             <Route
                 path="*"
                 element={<Navigate to="/login" replace />}
