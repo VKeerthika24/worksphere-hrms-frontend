@@ -183,3 +183,159 @@ body {
         padding: 0 15px;
     }
 }
+
+/* ========================================
+   ADD EMPLOYEE MODAL
+======================================== */
+
+.modal-backdrop.show {
+    opacity: 1 !important;
+    background-color: rgba(0, 0, 0, 0.55) !important;
+}
+
+/* Modal container */
+
+.modal {
+    z-index: 1055;
+}
+
+/* Modal box */
+
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Modal header */
+
+.modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header .modal-title {
+    color: #212529;
+    font-size: 22px;
+}
+
+.modal-header small {
+    color: #6c757d;
+}
+
+/* Modal body */
+
+.modal-body {
+    padding: 24px;
+    background-color: #ffffff;
+}
+
+/* Section headings */
+
+.modal-body h6 {
+    color: #343a40;
+    font-size: 16px;
+}
+
+/* Labels */
+
+.modal-body .form-label {
+    color: #343a40;
+    font-weight: 500;
+    margin-bottom: 6px;
+}
+
+/* Inputs */
+
+.modal-body .form-control,
+.modal-body .form-select {
+    min-height: 42px;
+    border: 1px solid #ced4da;
+    border-radius: 7px;
+    color: #212529;
+    background-color: #ffffff;
+}
+
+.modal-body .form-control:focus,
+.modal-body .form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+/* Placeholder */
+
+.modal-body .form-control::placeholder {
+    color: #adb5bd;
+}
+
+/* Form helper text */
+
+.modal-body .form-text {
+    color: #6c757d;
+    margin-top: 6px;
+}
+
+/* Divider */
+
+.modal-body hr {
+    border-color: #e9ecef;
+    opacity: 1;
+}
+
+/* Modal footer buttons */
+
+.modal-body .btn {
+    min-height: 40px;
+    border-radius: 7px;
+    padding: 8px 18px;
+}
+
+/* Close button */
+
+.modal-header .btn-close {
+    opacity: 0.6;
+}
+
+.modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+/* Scrollbar */
+
+.modal-dialog-scrollable .modal-body::-webkit-scrollbar {
+    width: 7px;
+}
+
+.modal-dialog-scrollable .modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb {
+    background: #adb5bd;
+    border-radius: 10px;
+}
+
+.modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb:hover {
+    background: #6c757d;
+}
+
+
+/* ========================================
+   ADD EMPLOYEE MODAL - RESPONSIVE
+======================================== */
+
+@media (max-width: 768px) {
+
+    .modal-dialog {
+        margin: 10px;
+    }
+
+    .modal-body {
+        padding: 18px;
+    }
+
+    .modal-header {
+        padding: 16px 18px;
+    }
+
+}

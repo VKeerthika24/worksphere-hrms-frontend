@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import employeeService from "../../services/employeeService";
+import AddEmployee from "./AddEmployee";
 
 function Employees() {
 
@@ -7,6 +8,11 @@ function Employees() {
     const [searchName, setSearchName] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [showAddEmployee, setShowAddEmployee] = useState(false);
+
+    // =========================
+    // FETCH ALL EMPLOYEES
+    // =========================
 
     const fetchEmployees = async () => {
 
@@ -19,6 +25,7 @@ function Employees() {
                 await employeeService.getAllEmployees();
 
             if (!response.success) {
+
                 throw new Error(
                     response.message ||
                     "Failed to fetch employees"
@@ -46,15 +53,24 @@ function Employees() {
         }
     };
 
+
+    // =========================
+    // SEARCH EMPLOYEES
+    // =========================
+
     const handleSearch = async (event) => {
 
         event.preventDefault();
 
         const trimmedName = searchName.trim();
 
-        // If search is empty, load all employees
+        // If search is empty,
+        // fetch all employees again.
+
         if (!trimmedName) {
+
             fetchEmployees();
+
             return;
         }
 
@@ -69,6 +85,7 @@ function Employees() {
                 );
 
             if (!response.success) {
+
                 throw new Error(
                     response.message ||
                     "Search failed"
@@ -96,6 +113,11 @@ function Employees() {
         }
     };
 
+
+    // =========================
+    // CLEAR SEARCH
+    // =========================
+
     const handleClearSearch = () => {
 
         setSearchName("");
@@ -103,11 +125,21 @@ function Employees() {
         fetchEmployees();
     };
 
+
+    // =========================
+    // INITIAL LOAD
+    // =========================
+
     useEffect(() => {
 
         fetchEmployees();
 
     }, []);
+
+
+    // =========================
+    // LOADING SCREEN
+    // =========================
 
     if (loading) {
 
@@ -127,10 +159,18 @@ function Employees() {
         );
     }
 
+
+    // =========================
+    // MAIN PAGE
+    // =========================
+
     return (
+
         <div>
 
-            {/* Page Header */}
+            {/* =========================
+                PAGE HEADER
+            ========================= */}
 
             <div className="d-flex justify-content-between align-items-center mb-4">
 
@@ -146,18 +186,29 @@ function Employees() {
 
                 </div>
 
+
+                {/* ADD EMPLOYEE BUTTON */}
+
                 <button
                     className="btn btn-primary"
                     type="button"
+                    onClick={() =>
+                        setShowAddEmployee(true)
+                    }
                 >
+
                     <i className="bi bi-plus-lg me-2"></i>
+
                     Add Employee
+
                 </button>
 
             </div>
 
 
-            {/* Search */}
+            {/* =========================
+                SEARCH
+            ========================= */}
 
             <div className="card border-0 shadow-sm mb-4">
 
@@ -168,12 +219,16 @@ function Employees() {
                         className="row g-2"
                     >
 
+                        {/* Search Input */}
+
                         <div className="col-md-8">
 
                             <div className="input-group">
 
                                 <span className="input-group-text">
+
                                     <i className="bi bi-search"></i>
+
                                 </span>
 
                                 <input
@@ -192,6 +247,9 @@ function Employees() {
 
                         </div>
 
+
+                        {/* Search Button */}
+
                         <div className="col-md-auto">
 
                             <button
@@ -202,6 +260,9 @@ function Employees() {
                             </button>
 
                         </div>
+
+
+                        {/* Clear Button */}
 
                         <div className="col-md-auto">
 
@@ -222,7 +283,9 @@ function Employees() {
             </div>
 
 
-            {/* Error */}
+            {/* =========================
+                ERROR MESSAGE
+            ========================= */}
 
             {error && (
 
@@ -236,7 +299,9 @@ function Employees() {
             )}
 
 
-            {/* Employee Table */}
+            {/* =========================
+                EMPLOYEE TABLE
+            ========================= */}
 
             <div className="card border-0 shadow-sm">
 
@@ -245,6 +310,8 @@ function Employees() {
                     <div className="table-responsive">
 
                         <table className="table table-hover align-middle mb-0">
+
+                            {/* TABLE HEADER */}
 
                             <thead className="table-light">
 
@@ -282,6 +349,9 @@ function Employees() {
 
                             </thead>
 
+
+                            {/* TABLE BODY */}
+
                             <tbody>
 
                                 {employees.length === 0 ? (
@@ -292,7 +362,9 @@ function Employees() {
                                             colSpan="7"
                                             className="text-center py-5 text-muted"
                                         >
+
                                             No employees found
+
                                         </td>
 
                                     </tr>
@@ -301,45 +373,85 @@ function Employees() {
 
                                     employees.map((employee) => (
 
-                                        <tr key={employee.id}>
+                                        <tr
+                                            key={employee.id}
+                                        >
+
+                                            {/* Employee Code */}
 
                                             <td>
+
                                                 {employee.employeeCode}
+
                                             </td>
 
+
+                                            {/* Name */}
+
                                             <td>
+
                                                 <div className="fw-semibold">
+
                                                     {employee.firstName}{" "}
+
                                                     {employee.lastName}
+
                                                 </div>
+
                                             </td>
 
+
+                                            {/* Email */}
+
                                             <td>
+
                                                 {employee.email}
+
                                             </td>
 
+
+                                            {/* Designation */}
+
                                             <td>
+
                                                 {employee.designation}
+
                                             </td>
 
+
+                                            {/* Department */}
+
                                             <td>
+
                                                 {employee.departmentName}
+
                                             </td>
 
+
+                                            {/* Phone */}
+
                                             <td>
+
                                                 {employee.phoneNumber}
+
                                             </td>
+
+
+                                            {/* Status */}
 
                                             <td>
 
                                                 <span
                                                     className={
-                                                        employee.status === "ACTIVE"
+                                                        employee.status ===
+                                                        "ACTIVE"
                                                             ? "badge bg-success"
                                                             : "badge bg-secondary"
                                                     }
                                                 >
+
                                                     {employee.status}
+
                                                 </span>
 
                                             </td>
@@ -359,6 +471,24 @@ function Employees() {
                 </div>
 
             </div>
+
+
+            {/* =========================
+                ADD EMPLOYEE MODAL
+            ========================= */}
+
+            {showAddEmployee && (
+
+                <AddEmployee
+                    onClose={() =>
+                        setShowAddEmployee(false)
+                    }
+                    onEmployeeCreated={
+                        fetchEmployees
+                    }
+                />
+
+            )}
 
         </div>
     );
