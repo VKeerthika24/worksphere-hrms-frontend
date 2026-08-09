@@ -6,6 +6,7 @@ import Dashboard from "../pages/dashboard/Dashboard";
 
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
+import Employees from "../pages/employee/Employees";
 
 function AppRoutes() {
 
@@ -53,7 +54,13 @@ function AppRoutes() {
                 }
             />
 
+            <Route
+                path="/employees"
+                element={<Employees />}
+            />
+
         </Routes>
+
     );
 }
 
