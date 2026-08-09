@@ -4,6 +4,7 @@ import employeeService from "../../services/employeeService";
 function Employees() {
 
     const [employees, setEmployees] = useState([]);
+    const [searchName, setSearchName] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -18,7 +19,6 @@ function Employees() {
                 await employeeService.getAllEmployees();
 
             if (!response.success) {
-
                 throw new Error(
                     response.message ||
                     "Failed to fetch employees"
@@ -44,6 +44,63 @@ function Employees() {
 
             setLoading(false);
         }
+    };
+
+    const handleSearch = async (event) => {
+
+        event.preventDefault();
+
+        const trimmedName = searchName.trim();
+
+        // If search is empty, load all employees
+        if (!trimmedName) {
+            fetchEmployees();
+            return;
+        }
+
+        try {
+
+            setLoading(true);
+            setError("");
+
+            const response =
+                await employeeService.searchEmployees(
+                    trimmedName
+                );
+
+            if (!response.success) {
+                throw new Error(
+                    response.message ||
+                    "Search failed"
+                );
+            }
+
+            setEmployees(response.data || []);
+
+        } catch (error) {
+
+            console.error(
+                "Employee search error:",
+                error
+            );
+
+            setError(
+                error.response?.data?.message ||
+                error.message ||
+                "Failed to search employees"
+            );
+
+        } finally {
+
+            setLoading(false);
+        }
+    };
+
+    const handleClearSearch = () => {
+
+        setSearchName("");
+
+        fetchEmployees();
     };
 
     useEffect(() => {
@@ -91,12 +148,76 @@ function Employees() {
 
                 <button
                     className="btn btn-primary"
+                    type="button"
                 >
                     <i className="bi bi-plus-lg me-2"></i>
-
                     Add Employee
-
                 </button>
+
+            </div>
+
+
+            {/* Search */}
+
+            <div className="card border-0 shadow-sm mb-4">
+
+                <div className="card-body">
+
+                    <form
+                        onSubmit={handleSearch}
+                        className="row g-2"
+                    >
+
+                        <div className="col-md-8">
+
+                            <div className="input-group">
+
+                                <span className="input-group-text">
+                                    <i className="bi bi-search"></i>
+                                </span>
+
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Search by first name..."
+                                    value={searchName}
+                                    onChange={(event) =>
+                                        setSearchName(
+                                            event.target.value
+                                        )
+                                    }
+                                />
+
+                            </div>
+
+                        </div>
+
+                        <div className="col-md-auto">
+
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                            >
+                                Search
+                            </button>
+
+                        </div>
+
+                        <div className="col-md-auto">
+
+                            <button
+                                type="button"
+                                className="btn btn-outline-secondary"
+                                onClick={handleClearSearch}
+                            >
+                                Clear
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
 
             </div>
 
@@ -187,12 +308,10 @@ function Employees() {
                                             </td>
 
                                             <td>
-
                                                 <div className="fw-semibold">
                                                     {employee.firstName}{" "}
                                                     {employee.lastName}
                                                 </div>
-
                                             </td>
 
                                             <td>
