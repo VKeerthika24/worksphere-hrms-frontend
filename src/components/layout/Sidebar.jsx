@@ -34,8 +34,15 @@ function Sidebar() {
         <aside className="sidebar">
 
             <div className="sidebar-brand">
-                <h4>WorkSphere</h4>
-                <small>HRMS</small>
+
+                <h4>
+                    WorkSphere
+                </h4>
+
+                <small>
+                    HRMS
+                </small>
+
             </div>
 
             <nav className="sidebar-menu">
@@ -51,7 +58,10 @@ function Sidebar() {
                             }`
                         }
                     >
-                        <i className={`bi ${item.icon}`}></i>
+
+                        <i
+                            className={`bi ${item.icon}`}
+                        ></i>
 
                         <span>
                             {item.name}

@@ -3,24 +3,17 @@ import { useAuth } from "../context/AuthContext";
 
 function ProtectedRoute() {
 
-    const { isAuthenticated, loading } = useAuth();
+    const { user, loading } = useAuth();
 
     if (loading) {
         return (
             <div className="min-vh-100 d-flex align-items-center justify-content-center">
-                <div
-                    className="spinner-border text-primary"
-                    role="status"
-                >
-                    <span className="visually-hidden">
-                        Loading...
-                    </span>
-                </div>
+                <h4>Loading...</h4>
             </div>
         );
     }
 
-    if (!isAuthenticated) {
+    if (!user) {
         return <Navigate to="/login" replace />;
     }
 
