@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import authService from "../../services/authService";
 import { useAuth } from "../../context/AuthContext";
 
 function Login() {
 
+    const navigate = useNavigate();
     const { login } = useAuth();
 
     const [formData, setFormData] = useState({
@@ -55,9 +56,7 @@ function Login() {
                 loginData.token
             );
 
-            console.log("Login successful:", response);
-
-            alert("Login successful!");
+            navigate("/dashboard");
 
         } catch (error) {
 
