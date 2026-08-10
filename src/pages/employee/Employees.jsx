@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import employeeService from "../../services/employeeService";
 import AddEmployee from "./AddEmployee";
+import EditEmployee from "./EditEmployee";
 
 function Employees() {
 
@@ -8,7 +9,14 @@ function Employees() {
     const [searchName, setSearchName] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    // Add Employee
     const [showAddEmployee, setShowAddEmployee] = useState(false);
+
+    // Edit Employee
+    const [showEditEmployee, setShowEditEmployee] = useState(false);
+    const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+
 
     // =========================
     // FETCH ALL EMPLOYEES
@@ -62,10 +70,8 @@ function Employees() {
 
         event.preventDefault();
 
-        const trimmedName = searchName.trim();
-
-        // If search is empty,
-        // fetch all employees again.
+        const trimmedName =
+            searchName.trim();
 
         if (!trimmedName) {
 
@@ -92,7 +98,9 @@ function Employees() {
                 );
             }
 
-            setEmployees(response.data || []);
+            setEmployees(
+                response.data || []
+            );
 
         } catch (error) {
 
@@ -125,6 +133,83 @@ function Employees() {
         fetchEmployees();
     };
 
+
+    // =========================
+    // OPEN EDIT MODAL
+    // =========================
+
+    const handleEdit = (employeeId) => {
+
+        setSelectedEmployeeId(employeeId);
+
+        setShowEditEmployee(true);
+    };
+
+
+    // =========================
+    // CLOSE EDIT MODAL
+    // =========================
+
+    const handleCloseEdit = () => {
+
+        setShowEditEmployee(false);
+
+        setSelectedEmployeeId(null);
+    };
+
+
+
+    // =========================
+    // DEACTIVATE EMPLOYEE
+    // =========================
+
+    const handleDelete = async (employee) => {
+
+        const confirmed = window.confirm(
+            `Are you sure you want to deactivate ${employee.firstName} ${employee.lastName}?`
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+
+            setError("");
+
+            const response =
+                await employeeService.deleteEmployee(
+                    employee.id
+                );
+
+            if (!response.success) {
+
+                throw new Error(
+                    response.message ||
+                    "Failed to deactivate employee"
+                );
+            }
+
+            alert(
+                "Employee deactivated successfully! 🚫"
+            );
+
+            await fetchEmployees();
+
+        } catch (error) {
+
+            console.error(
+                "Deactivate employee error:",
+                error
+            );
+
+            setError(
+                error.response?.data?.message ||
+                error.message ||
+                "Failed to deactivate employee"
+            );
+        }
+    };
 
     // =========================
     // INITIAL LOAD
@@ -219,8 +304,6 @@ function Employees() {
                         className="row g-2"
                     >
 
-                        {/* Search Input */}
-
                         <div className="col-md-8">
 
                             <div className="input-group">
@@ -248,8 +331,6 @@ function Employees() {
                         </div>
 
 
-                        {/* Search Button */}
-
                         <div className="col-md-auto">
 
                             <button
@@ -261,8 +342,6 @@ function Employees() {
 
                         </div>
 
-
-                        {/* Clear Button */}
 
                         <div className="col-md-auto">
 
@@ -345,6 +424,10 @@ function Employees() {
                                         Status
                                     </th>
 
+                                    <th className="text-center">
+                                        Actions
+                                    </th>
+
                                 </tr>
 
                             </thead>
@@ -359,7 +442,7 @@ function Employees() {
                                     <tr>
 
                                         <td
-                                            colSpan="7"
+                                            colSpan="8"
                                             className="text-center py-5 text-muted"
                                         >
 
@@ -444,7 +527,7 @@ function Employees() {
                                                 <span
                                                     className={
                                                         employee.status ===
-                                                        "ACTIVE"
+                                                            "ACTIVE"
                                                             ? "badge bg-success"
                                                             : "badge bg-secondary"
                                                     }
@@ -453,6 +536,45 @@ function Employees() {
                                                     {employee.status}
 
                                                 </span>
+
+                                            </td>
+
+
+                                            {/* ACTIONS */}
+
+                                            <td>
+
+                                                <div className="d-flex justify-content-center gap-2">
+
+                                                    {/* EDIT */}
+
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-sm btn-outline-primary"
+                                                        title="Edit Employee"
+                                                        onClick={() =>
+                                                            handleEdit(
+                                                                employee.id
+                                                            )
+                                                        }
+                                                    >
+
+                                                        <i className="bi bi-pencil"></i>
+
+                                                    </button>
+
+                                                    {/* DELETE - WE WILL ADD NEXT */}
+
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        title="Deactivate Employee"
+                                                        onClick={() => handleDelete(employee)}
+                                                        disabled={employee.status === "INACTIVE"}
+                                                    >
+                                                        <i className="bi bi-person-x"></i>
+                                                    </button>
+                                                </div>
 
                                             </td>
 
@@ -489,6 +611,30 @@ function Employees() {
                 />
 
             )}
+
+
+            {/* =========================
+                EDIT EMPLOYEE MODAL
+            ========================= */}
+
+            {showEditEmployee &&
+                selectedEmployeeId && (
+
+                    <EditEmployee
+                        employeeId={
+                            selectedEmployeeId
+                        }
+
+                        onClose={
+                            handleCloseEdit
+                        }
+
+                        onEmployeeUpdated={
+                            fetchEmployees
+                        }
+                    />
+
+                )}
 
         </div>
     );
