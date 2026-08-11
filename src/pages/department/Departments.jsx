@@ -142,51 +142,51 @@ function Departments() {
 
     const handleDelete = async (department) => {
 
-        const confirmed = window.confirm(
-            `Are you sure you want to delete ${department.name}?`
-        );
+    const confirmed = window.confirm(
+        `Are you sure you want to delete ${department.name}?`
+    );
 
-        if (!confirmed) {
-            return;
-        }
+    if (!confirmed) {
+        return;
+    }
 
-        try {
+    try {
 
-            setError("");
+        setError("");
 
-            const response =
-                await departmentService.deleteDepartment(
-                    department.id
-                );
-
-            if (!response.success) {
-
-                throw new Error(
-                    response.message ||
-                    "Failed to delete department"
-                );
-            }
-
-            alert(
-                "Department deleted successfully! 🗑️"
+        const response =
+            await departmentService.deleteDepartment(
+                department.id
             );
 
-            await fetchDepartments();
+        if (!response.success) {
 
-        } catch (error) {
-
-            console.error(
-                "Delete department error:",
-                error
-            );
-
-            setError(
-                error.response?.data?.message ||
-                error.message ||
+            throw new Error(
+                response.message ||
                 "Failed to delete department"
             );
         }
-    };
+
+        alert(
+            "Department deleted successfully! 🗑️"
+        );
+
+        await fetchDepartments();
+
+    } catch (error) {
+
+        console.error(
+            "Delete department error:",
+            error
+        );
+
+        setError(
+            error.response?.data?.message ||
+            error.message ||
+            "Failed to delete department"
+        );
+    }
+};
 
     return (
 
