@@ -3,17 +3,21 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
+import Employees from "../pages/employee/Employees";
+import Departments from "../pages/department/Departments";
 
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
-import Employees from "../pages/employee/Employees";
 
 function AppRoutes() {
 
     return (
+
         <Routes>
 
-            {/* Public Routes */}
+            {/* =========================
+                PUBLIC ROUTES
+            ========================= */}
 
             <Route
                 path="/login"
@@ -26,7 +30,9 @@ function AppRoutes() {
             />
 
 
-            {/* Protected Application */}
+            {/* =========================
+                PROTECTED APPLICATION
+            ========================= */}
 
             <Route element={<ProtectedRoute />}>
 
@@ -37,12 +43,44 @@ function AppRoutes() {
                         element={<Dashboard />}
                     />
 
+                    <Route
+                        path="/employees"
+                        element={<Employees />}
+                    />
+
+                    <Route
+                        path="/departments"
+                        element={<Departments />}
+                    />
+
+                    {/* Future routes */}
+
+                    <Route
+                        path="/attendance"
+                        element={
+                            <div>
+                                Attendance Page
+                            </div>
+                        }
+                    />
+
+                    <Route
+                        path="/leaves"
+                        element={
+                            <div>
+                                Leaves Page
+                            </div>
+                        }
+                    />
+
                 </Route>
 
             </Route>
 
 
-            {/* Unknown URL */}
+            {/* =========================
+                UNKNOWN URL
+            ========================= */}
 
             <Route
                 path="*"
@@ -54,13 +92,7 @@ function AppRoutes() {
                 }
             />
 
-            <Route
-                path="/employees"
-                element={<Employees />}
-            />
-
         </Routes>
-
     );
 }
 
