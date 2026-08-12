@@ -9,6 +9,8 @@ import Departments from "../pages/department/Departments";
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
 
+import Attendance from "../pages/attendance/Attendance";
+
 function AppRoutes() {
 
     return (
@@ -55,14 +57,7 @@ function AppRoutes() {
 
                     {/* Future routes */}
 
-                    <Route
-                        path="/attendance"
-                        element={
-                            <div>
-                                Attendance Page
-                            </div>
-                        }
-                    />
+                    
 
                     <Route
                         path="/leaves"
@@ -71,6 +66,11 @@ function AppRoutes() {
                                 Leaves Page
                             </div>
                         }
+                    />
+
+                    <Route
+                        path="/attendance"
+                        element={<Attendance />}
                     />
 
                 </Route>
