@@ -10,6 +10,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
 
 import Attendance from "../pages/attendance/Attendance";
+import Leaves from "../pages/leaves/Leaves";
 
 function AppRoutes() {
 
@@ -54,10 +55,14 @@ function AppRoutes() {
                         path="/departments"
                         element={<Departments />}
                     />
+                    <Route
+                        path="/leaves"
+                        element={<Leaves />}
+                    />
 
                     {/* Future routes */}
 
-                    
+
 
                     <Route
                         path="/leaves"
