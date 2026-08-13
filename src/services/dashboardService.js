@@ -4,11 +4,8 @@ const dashboardService = {
 
     getDashboard: async () => {
 
-        const response = await api.get("/dashboard", {
-            headers: {
-                Authorization: undefined
-            }
-        });
+        const response =
+            await api.get("/dashboard");
 
         return response.data;
     }
