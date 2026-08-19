@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function ProtectedRoute({ allowedRoles }) {
@@ -8,8 +8,6 @@ function ProtectedRoute({ allowedRoles }) {
         loading
     } = useAuth();
 
-    const location = useLocation();
-
 
     // =========================
     // AUTHENTICATION LOADING
@@ -18,6 +16,7 @@ function ProtectedRoute({ allowedRoles }) {
     if (loading) {
 
         return (
+
             <div className="min-vh-100 d-flex align-items-center justify-content-center">
 
                 <div className="text-center">
@@ -48,14 +47,13 @@ function ProtectedRoute({ allowedRoles }) {
             <Navigate
                 to="/login"
                 replace
-                state={{ from: location }}
             />
         );
     }
 
 
     // =========================
-    // ROLE AUTHORIZATION
+    // ROLE CHECK
     // =========================
 
     if (

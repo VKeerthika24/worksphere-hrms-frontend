@@ -5,11 +5,12 @@ import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Employees from "../pages/employee/Employees";
 import Departments from "../pages/department/Departments";
-import Attendance from "../pages/attendance/Attendance";
-import Leaves from "../pages/leaves/Leaves";
 
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
+
+import Attendance from "../pages/attendance/Attendance";
+import Leaves from "../pages/leaves/Leaves";
 
 
 function AppRoutes() {
@@ -37,13 +38,13 @@ function AppRoutes() {
                 ALL AUTHENTICATED USERS
             ========================= */}
 
-            <Route element={<ProtectedRoute />}>
+            <Route
+                element={<ProtectedRoute />}
+            >
 
                 <Route element={<MainLayout />}>
 
-                    {/* =========================
-                        DASHBOARD
-                    ========================= */}
+                    {/* DASHBOARD */}
 
                     <Route
                         path="/dashboard"
@@ -51,37 +52,7 @@ function AppRoutes() {
                     />
 
 
-                    {/* =========================
-                        EMPLOYEES
-                        ADMIN + MANAGER
-                    ========================= */}
-
-                    <Route
-                        element={
-                            <ProtectedRoute
-                                allowedRoles={[
-                                    "ADMIN",
-                                    "MANAGER"
-                                ]}
-                            />
-                        }
-                    >
-                        <Route
-                            path="/employees"
-                            element={<Employees />}
-                        />
-
-                        <Route
-                            path="/departments"
-                            element={<Departments />}
-                        />
-                    </Route>
-
-
-                    {/* =========================
-                        ATTENDANCE
-                        ALL ROLES
-                    ========================= */}
+                    {/* ATTENDANCE */}
 
                     <Route
                         path="/attendance"
@@ -89,14 +60,49 @@ function AppRoutes() {
                     />
 
 
-                    {/* =========================
-                        LEAVES
-                        ALL ROLES
-                    ========================= */}
+                    {/* LEAVES */}
 
                     <Route
                         path="/leaves"
                         element={<Leaves />}
+                    />
+
+
+                </Route>
+
+            </Route>
+
+
+            {/* =========================
+                ADMIN / MANAGER ROUTES
+            ========================= */}
+
+            <Route
+                element={
+                    <ProtectedRoute
+                        allowedRoles={[
+                            "ADMIN",
+                            "MANAGER"
+                        ]}
+                    />
+                }
+            >
+
+                <Route element={<MainLayout />}>
+
+                    {/* EMPLOYEES */}
+
+                    <Route
+                        path="/employees"
+                        element={<Employees />}
+                    />
+
+
+                    {/* DEPARTMENTS */}
+
+                    <Route
+                        path="/departments"
+                        element={<Departments />}
                     />
 
                 </Route>
