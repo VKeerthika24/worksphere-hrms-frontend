@@ -3,6 +3,19 @@ import api from "./axios";
 const employeeService = {
 
     // =========================
+    // GET CURRENT LOGGED-IN EMPLOYEE
+    // =========================
+
+    getCurrentEmployee: async () => {
+
+        const response =
+            await api.get("/employees/me");
+
+        return response.data;
+    },
+
+
+    // =========================
     // GET ALL EMPLOYEES
     // =========================
 

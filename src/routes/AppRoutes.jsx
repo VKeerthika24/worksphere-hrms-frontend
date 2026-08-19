@@ -5,12 +5,12 @@ import Register from "../pages/auth/Register";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Employees from "../pages/employee/Employees";
 import Departments from "../pages/department/Departments";
+import Attendance from "../pages/attendance/Attendance";
+import Leaves from "../pages/leaves/Leaves";
 
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../components/layout/MainLayout";
 
-import Attendance from "../pages/attendance/Attendance";
-import Leaves from "../pages/leaves/Leaves";
 
 function AppRoutes() {
 
@@ -34,48 +34,69 @@ function AppRoutes() {
 
 
             {/* =========================
-                PROTECTED APPLICATION
+                ALL AUTHENTICATED USERS
             ========================= */}
 
             <Route element={<ProtectedRoute />}>
 
                 <Route element={<MainLayout />}>
 
+                    {/* =========================
+                        DASHBOARD
+                    ========================= */}
+
                     <Route
                         path="/dashboard"
                         element={<Dashboard />}
                     />
 
-                    <Route
-                        path="/employees"
-                        element={<Employees />}
-                    />
+
+                    {/* =========================
+                        EMPLOYEES
+                        ADMIN + MANAGER
+                    ========================= */}
 
                     <Route
-                        path="/departments"
-                        element={<Departments />}
-                    />
-                    <Route
-                        path="/leaves"
-                        element={<Leaves />}
-                    />
-
-                    {/* Future routes */}
-
-
-
-                    <Route
-                        path="/leaves"
                         element={
-                            <div>
-                                Leaves Page
-                            </div>
+                            <ProtectedRoute
+                                allowedRoles={[
+                                    "ADMIN",
+                                    "MANAGER"
+                                ]}
+                            />
                         }
-                    />
+                    >
+                        <Route
+                            path="/employees"
+                            element={<Employees />}
+                        />
+
+                        <Route
+                            path="/departments"
+                            element={<Departments />}
+                        />
+                    </Route>
+
+
+                    {/* =========================
+                        ATTENDANCE
+                        ALL ROLES
+                    ========================= */}
 
                     <Route
                         path="/attendance"
                         element={<Attendance />}
+                    />
+
+
+                    {/* =========================
+                        LEAVES
+                        ALL ROLES
+                    ========================= */}
+
+                    <Route
+                        path="/leaves"
+                        element={<Leaves />}
                     />
 
                 </Route>

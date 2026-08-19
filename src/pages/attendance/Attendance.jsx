@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 import attendanceService from "../../services/attendanceService";
 import employeeService from "../../services/employeeService";
+import { useAuth } from "../../context/AuthContext";
 
 function Attendance() {
 
+    const { user } = useAuth();
+
     const [attendance, setAttendance] = useState([]);
+
+    const [currentEmployee, setCurrentEmployee] = useState(null);
 
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
@@ -13,8 +18,150 @@ function Attendance() {
     const [success, setSuccess] = useState("");
 
 
+    const isEmployee =
+        user?.role === "EMPLOYEE";
+
+
     // =========================
-    // FETCH EMPLOYEES + ATTENDANCE
+    // FETCH EMPLOYEE ATTENDANCE
+    // =========================
+
+    const fetchEmployeeAttendance = async () => {
+
+        try {
+
+            setLoading(true);
+            setError("");
+
+            // -------------------------
+            // GET CURRENT EMPLOYEE
+            // -------------------------
+
+            const employeeResponse =
+                await employeeService.getCurrentEmployee();
+
+            if (!employeeResponse.success) {
+
+                throw new Error(
+                    employeeResponse.message ||
+                    "Failed to fetch employee profile"
+                );
+            }
+
+            const employee =
+                employeeResponse.data;
+
+            setCurrentEmployee(employee);
+
+
+            // -------------------------
+            // GET ATTENDANCE HISTORY
+            // -------------------------
+
+            const attendanceResponse =
+                await attendanceService.getAttendanceHistory(
+                    employee.id
+                );
+
+            if (!attendanceResponse.success) {
+
+                throw new Error(
+                    attendanceResponse.message ||
+                    "Failed to fetch attendance"
+                );
+            }
+
+
+            const history =
+                attendanceResponse.data || [];
+
+
+            // -------------------------
+            // GET TODAY'S ATTENDANCE
+            // -------------------------
+
+            const today =
+                new Date()
+                    .toISOString()
+                    .split("T")[0];
+
+
+            const todayAttendance =
+                history.find(
+                    item =>
+                        item.attendanceDate === today
+                );
+
+
+            /*
+             * If employee has attendance today,
+             * show it.
+             *
+             * Otherwise create an empty
+             * attendance object for today.
+             */
+
+            if (todayAttendance) {
+
+                setAttendance([
+                    todayAttendance
+                ]);
+
+            } else {
+
+                setAttendance([
+                    {
+                        id: null,
+
+                        employeeId:
+                            employee.id,
+
+                        attendanceDate:
+                            today,
+
+                        checkIn: null,
+
+                        checkOut: null,
+
+                        workingHours: 0,
+
+                        status: null,
+
+                        employeeCode:
+                            employee.employeeCode,
+
+                        employeeName:
+                            `${employee.firstName} ${employee.lastName}`,
+
+                        late: null,
+
+                        overtimeHours: 0
+                    }
+                ]);
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Employee attendance error:",
+                error
+            );
+
+            setError(
+                error.response?.data?.message ||
+                error.message ||
+                "Failed to load attendance"
+            );
+
+        } finally {
+
+            setLoading(false);
+        }
+    };
+
+
+    // =========================
+    // FETCH MANAGER / ADMIN
     // =========================
 
     const fetchTodayAttendance = async () => {
@@ -51,10 +198,6 @@ function Attendance() {
             }
 
 
-            // =========================
-            // ACTIVE EMPLOYEES ONLY
-            // =========================
-
             const activeEmployees =
                 (employeeResponse.data || [])
                     .filter(
@@ -66,10 +209,6 @@ function Attendance() {
             const todayAttendance =
                 attendanceResponse.data || [];
 
-
-            // =========================
-            // MERGE EMPLOYEE + ATTENDANCE
-            // =========================
 
             const mergedData =
                 activeEmployees.map(employee => {
@@ -114,7 +253,6 @@ function Attendance() {
                         late: null,
 
                         overtimeHours: null
-
                     };
 
                 });
@@ -143,14 +281,27 @@ function Attendance() {
 
 
     // =========================
-    // INITIAL LOAD
+    // LOAD DATA
     // =========================
+
+    const fetchAttendance = async () => {
+
+        if (isEmployee) {
+
+            await fetchEmployeeAttendance();
+
+        } else {
+
+            await fetchTodayAttendance();
+        }
+    };
+
 
     useEffect(() => {
 
-        fetchTodayAttendance();
+        fetchAttendance();
 
-    }, []);
+    }, [user?.role]);
 
 
     // =========================
@@ -185,7 +336,7 @@ function Attendance() {
             );
 
 
-            await fetchTodayAttendance();
+            await fetchAttendance();
 
         } catch (error) {
 
@@ -239,7 +390,7 @@ function Attendance() {
             );
 
 
-            await fetchTodayAttendance();
+            await fetchAttendance();
 
         } catch (error) {
 
@@ -331,11 +482,10 @@ function Attendance() {
                 />
 
                 <p className="mt-3 text-muted">
-                    Loading today's attendance...
+                    Loading attendance...
                 </p>
 
             </div>
-
         );
     }
 
@@ -366,6 +516,527 @@ function Attendance() {
         ).length;
 
 
+    // =====================================================
+    // EMPLOYEE VIEW
+    // =====================================================
+
+    if (isEmployee) {
+
+        const todayAttendance =
+            attendance[0];
+
+
+        return (
+
+            <div>
+
+                {/* =========================
+                    HEADER
+                ========================= */}
+
+                <div className="d-flex justify-content-between align-items-center mb-4">
+
+                    <div>
+
+                        <h2 className="fw-bold mb-1">
+                            My Attendance
+                        </h2>
+
+                        <p className="text-muted mb-0">
+                            View and manage your attendance
+                        </p>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        className="btn btn-outline-primary"
+                        onClick={fetchAttendance}
+                        disabled={actionLoading}
+                    >
+
+                        <i className="bi bi-arrow-clockwise me-2"></i>
+
+                        Refresh
+
+                    </button>
+
+                </div>
+
+
+                {/* =========================
+                    SUCCESS
+                ========================= */}
+
+                {success && (
+
+                    <div className="alert alert-success">
+
+                        {success}
+
+                    </div>
+                )}
+
+
+                {/* =========================
+                    ERROR
+                ========================= */}
+
+                {error && (
+
+                    <div className="alert alert-danger">
+
+                        {error}
+
+                    </div>
+                )}
+
+
+                {/* =========================
+                    EMPLOYEE INFO
+                ========================= */}
+
+                {currentEmployee && (
+
+                    <div className="card border-0 shadow-sm mb-4">
+
+                        <div className="card-body">
+
+                            <div className="row">
+
+                                <div className="col-md-4">
+
+                                    <small className="text-muted">
+                                        Employee
+                                    </small>
+
+                                    <h5 className="fw-bold mb-0">
+
+                                        {currentEmployee.firstName}{" "}
+                                        {currentEmployee.lastName}
+
+                                    </h5>
+
+                                </div>
+
+
+                                <div className="col-md-4">
+
+                                    <small className="text-muted">
+                                        Employee Code
+                                    </small>
+
+                                    <h5 className="fw-bold mb-0">
+
+                                        {currentEmployee.employeeCode}
+
+                                    </h5>
+
+                                </div>
+
+
+                                <div className="col-md-4">
+
+                                    <small className="text-muted">
+                                        Department
+                                    </small>
+
+                                    <h5 className="fw-bold mb-0">
+
+                                        {currentEmployee.departmentName}
+
+                                    </h5>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                )}
+
+
+                {/* =========================
+                    TODAY'S ATTENDANCE
+                ========================= */}
+
+                <div className="row g-3 mb-4">
+
+                    <div className="col-md-3">
+
+                        <div className="card border-0 shadow-sm">
+
+                            <div className="card-body">
+
+                                <p className="text-muted mb-1">
+                                    Check In
+                                </p>
+
+                                <h4 className="fw-bold">
+
+                                    {formatTime(
+                                        todayAttendance?.checkIn
+                                    )}
+
+                                </h4>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="col-md-3">
+
+                        <div className="card border-0 shadow-sm">
+
+                            <div className="card-body">
+
+                                <p className="text-muted mb-1">
+                                    Check Out
+                                </p>
+
+                                <h4 className="fw-bold">
+
+                                    {formatTime(
+                                        todayAttendance?.checkOut
+                                    )}
+
+                                </h4>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="col-md-3">
+
+                        <div className="card border-0 shadow-sm">
+
+                            <div className="card-body">
+
+                                <p className="text-muted mb-1">
+                                    Working Hours
+                                </p>
+
+                                <h4 className="fw-bold">
+
+                                    {formatHours(
+                                        todayAttendance?.workingHours
+                                    )}
+
+                                </h4>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="col-md-3">
+
+                        <div className="card border-0 shadow-sm">
+
+                            <div className="card-body">
+
+                                <p className="text-muted mb-1">
+                                    Status
+                                </p>
+
+                                {todayAttendance?.status ? (
+
+                                    <span
+                                        className={`badge ${getStatusBadge(
+                                            todayAttendance.status
+                                        )}`}
+                                    >
+
+                                        {todayAttendance.status}
+
+                                    </span>
+
+                                ) : (
+
+                                    <span className="badge bg-secondary">
+                                        Not Marked
+                                    </span>
+
+                                )}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                {/* =========================
+                    ACTION
+                ========================= */}
+
+                <div className="card border-0 shadow-sm mb-4">
+
+                    <div className="card-body">
+
+                        <h5 className="fw-bold mb-3">
+                            Today's Action
+                        </h5>
+
+
+                        {!todayAttendance?.checkIn && (
+
+                            <button
+                                type="button"
+                                className="btn btn-success"
+                                onClick={() =>
+                                    handleCheckIn(
+                                        currentEmployee.id
+                                    )
+                                }
+                                disabled={actionLoading}
+                            >
+
+                                <i className="bi bi-box-arrow-in-right me-2"></i>
+
+                                {actionLoading
+                                    ? "Processing..."
+                                    : "Check In"}
+
+                            </button>
+                        )}
+
+
+                        {todayAttendance?.checkIn &&
+                            !todayAttendance?.checkOut && (
+
+                                <button
+                                    type="button"
+                                    className="btn btn-danger"
+                                    onClick={() =>
+                                        handleCheckOut(
+                                            currentEmployee.id
+                                        )
+                                    }
+                                    disabled={actionLoading}
+                                >
+
+                                    <i className="bi bi-box-arrow-right me-2"></i>
+
+                                    {actionLoading
+                                        ? "Processing..."
+                                        : "Check Out"}
+
+                                </button>
+                            )}
+
+
+                        {todayAttendance?.checkIn &&
+                            todayAttendance?.checkOut && (
+
+                                <span className="badge bg-secondary p-2">
+
+                                    Attendance Completed
+
+                                </span>
+                            )}
+
+                    </div>
+
+                </div>
+
+
+                {/* =========================
+                    ATTENDANCE HISTORY
+                ========================= */}
+
+                <div className="card border-0 shadow-sm">
+
+                    <div className="card-header bg-white border-0 py-3">
+
+                        <h5 className="fw-bold mb-1">
+                            Today's Attendance
+                        </h5>
+
+                        <small className="text-muted">
+
+                            {new Date().toLocaleDateString(
+                                "en-IN",
+                                {
+                                    day: "2-digit",
+                                    month: "short",
+                                    year: "numeric"
+                                }
+                            )}
+
+                        </small>
+
+                    </div>
+
+
+                    <div className="card-body p-0">
+
+                        <div className="table-responsive">
+
+                            <table className="table table-hover align-middle mb-0">
+
+                                <thead className="table-light">
+
+                                    <tr>
+
+                                        <th>
+                                            Employee
+                                        </th>
+
+                                        <th>
+                                            Employee Code
+                                        </th>
+
+                                        <th>
+                                            Check In
+                                        </th>
+
+                                        <th>
+                                            Check Out
+                                        </th>
+
+                                        <th>
+                                            Working Hours
+                                        </th>
+
+                                        <th>
+                                            Status
+                                        </th>
+
+                                        <th>
+                                            Late
+                                        </th>
+
+                                        <th>
+                                            Overtime
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    <tr>
+
+                                        <td>
+                                            {todayAttendance?.employeeName}
+                                        </td>
+
+                                        <td>
+                                            {todayAttendance?.employeeCode}
+                                        </td>
+
+                                        <td>
+                                            {formatTime(
+                                                todayAttendance?.checkIn
+                                            )}
+                                        </td>
+
+                                        <td>
+                                            {formatTime(
+                                                todayAttendance?.checkOut
+                                            )}
+                                        </td>
+
+                                        <td>
+                                            {formatHours(
+                                                todayAttendance?.workingHours
+                                            )}
+                                        </td>
+
+                                        <td>
+
+                                            {todayAttendance?.status ? (
+
+                                                <span
+                                                    className={`badge ${getStatusBadge(
+                                                        todayAttendance.status
+                                                    )}`}
+                                                >
+
+                                                    {
+                                                        todayAttendance.status
+                                                    }
+
+                                                </span>
+
+                                            ) : (
+
+                                                <span className="badge bg-secondary">
+                                                    Not Marked
+                                                </span>
+
+                                            )}
+
+                                        </td>
+
+                                        <td>
+
+                                            {todayAttendance?.late === true ? (
+
+                                                <span className="badge bg-danger">
+                                                    Late
+                                                </span>
+
+                                            ) : todayAttendance?.late === false ? (
+
+                                                <span className="badge bg-success">
+                                                    On Time
+                                                </span>
+
+                                            ) : (
+
+                                                <span className="text-muted">
+                                                    -
+                                                </span>
+
+                                            )}
+
+                                        </td>
+
+                                        <td>
+
+                                            {formatHours(
+                                                todayAttendance?.overtimeHours
+                                            )}
+
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        );
+    }
+
+
+    // =====================================================
+    // MANAGER / ADMIN VIEW
+    // =====================================================
+
     return (
 
         <div>
@@ -392,7 +1063,7 @@ function Attendance() {
                 <button
                     type="button"
                     className="btn btn-outline-primary"
-                    onClick={fetchTodayAttendance}
+                    onClick={fetchAttendance}
                     disabled={actionLoading}
                 >
 
@@ -406,64 +1077,38 @@ function Attendance() {
 
 
             {/* =========================
-                SUCCESS MESSAGE
+                SUCCESS
             ========================= */}
 
             {success && (
 
-                <div
-                    className="alert alert-success alert-dismissible fade show"
-                    role="alert"
-                >
+                <div className="alert alert-success">
 
                     {success}
 
-                    <button
-                        type="button"
-                        className="btn-close"
-                        onClick={() =>
-                            setSuccess("")
-                        }
-                    />
-
                 </div>
-
             )}
 
 
             {/* =========================
-                ERROR MESSAGE
+                ERROR
             ========================= */}
 
             {error && (
 
-                <div
-                    className="alert alert-danger alert-dismissible fade show"
-                    role="alert"
-                >
+                <div className="alert alert-danger">
 
                     {error}
 
-                    <button
-                        type="button"
-                        className="btn-close"
-                        onClick={() =>
-                            setError("")
-                        }
-                    />
-
                 </div>
-
             )}
 
 
             {/* =========================
-                SUMMARY CARDS
+                SUMMARY
             ========================= */}
 
             <div className="row g-3 mb-4">
-
-                {/* TOTAL ACTIVE EMPLOYEES */}
 
                 <div className="col-md-3">
 
@@ -486,8 +1131,6 @@ function Attendance() {
                 </div>
 
 
-                {/* CHECKED IN */}
-
                 <div className="col-md-3">
 
                     <div className="card border-0 shadow-sm h-100">
@@ -509,8 +1152,6 @@ function Attendance() {
                 </div>
 
 
-                {/* CHECKED OUT */}
-
                 <div className="col-md-3">
 
                     <div className="card border-0 shadow-sm h-100">
@@ -531,8 +1172,6 @@ function Attendance() {
 
                 </div>
 
-
-                {/* NOT CHECKED IN */}
 
                 <div className="col-md-3">
 
@@ -595,38 +1234,14 @@ function Attendance() {
 
                                 <tr>
 
-                                    <th>
-                                        Employee
-                                    </th>
-
-                                    <th>
-                                        Employee Code
-                                    </th>
-
-                                    <th>
-                                        Check In
-                                    </th>
-
-                                    <th>
-                                        Check Out
-                                    </th>
-
-                                    <th>
-                                        Working Hours
-                                    </th>
-
-                                    <th>
-                                        Status
-                                    </th>
-
-                                    <th>
-                                        Late
-                                    </th>
-
-                                    <th>
-                                        Overtime
-                                    </th>
-
+                                    <th>Employee</th>
+                                    <th>Employee Code</th>
+                                    <th>Check In</th>
+                                    <th>Check Out</th>
+                                    <th>Working Hours</th>
+                                    <th>Status</th>
+                                    <th>Late</th>
+                                    <th>Overtime</th>
                                     <th className="text-center">
                                         Actions
                                     </th>
@@ -657,160 +1272,129 @@ function Attendance() {
 
                                 ) : (
 
-                                    attendance.map(
-                                        item => (
+                                    attendance.map(item => (
 
-                                            <tr
-                                                key={
-                                                    item.employeeId
-                                                }
-                                            >
+                                        <tr
+                                            key={item.employeeId}
+                                        >
 
-                                                {/* EMPLOYEE */}
+                                            <td>
+                                                <div className="fw-semibold">
+                                                    {item.employeeName}
+                                                </div>
+                                            </td>
 
-                                                <td>
+                                            <td>
+                                                <span className="text-muted">
+                                                    {item.employeeCode}
+                                                </span>
+                                            </td>
 
-                                                    <div className="fw-semibold">
+                                            <td>
+                                                {formatTime(
+                                                    item.checkIn
+                                                )}
+                                            </td>
 
-                                                        {
-                                                            item.employeeName
-                                                        }
+                                            <td>
+                                                {formatTime(
+                                                    item.checkOut
+                                                )}
+                                            </td>
 
-                                                    </div>
+                                            <td>
+                                                {formatHours(
+                                                    item.workingHours
+                                                )}
+                                            </td>
 
-                                                </td>
+                                            <td>
 
+                                                {item.status ? (
 
-                                                {/* CODE */}
-
-                                                <td>
-
-                                                    <span className="text-muted">
-
-                                                        {
-                                                            item.employeeCode
-                                                        }
-
+                                                    <span
+                                                        className={`badge ${getStatusBadge(
+                                                            item.status
+                                                        )}`}
+                                                    >
+                                                        {item.status}
                                                     </span>
 
-                                                </td>
+                                                ) : (
 
+                                                    <span className="badge bg-secondary">
+                                                        Not Marked
+                                                    </span>
 
-                                                {/* CHECK IN */}
+                                                )}
 
-                                                <td>
+                                            </td>
 
-                                                    {formatTime(
-                                                        item.checkIn
-                                                    )}
+                                            <td>
 
-                                                </td>
+                                                {item.late === true ? (
 
+                                                    <span className="badge bg-danger">
+                                                        Late
+                                                    </span>
 
-                                                {/* CHECK OUT */}
+                                                ) : item.late === false ? (
 
-                                                <td>
+                                                    <span className="badge bg-success">
+                                                        On Time
+                                                    </span>
 
-                                                    {formatTime(
-                                                        item.checkOut
-                                                    )}
+                                                ) : (
 
-                                                </td>
+                                                    <span className="text-muted">
+                                                        -
+                                                    </span>
 
+                                                )}
 
-                                                {/* WORKING HOURS */}
+                                            </td>
 
-                                                <td>
+                                            <td>
+                                                {formatHours(
+                                                    item.overtimeHours
+                                                )}
+                                            </td>
 
-                                                    {formatHours(
-                                                        item.workingHours
-                                                    )}
+                                            <td>
 
-                                                </td>
+                                                <div className="d-flex justify-content-center">
 
+                                                    {!item.checkIn && (
 
-                                                {/* STATUS */}
-
-                                                <td>
-
-                                                    {item.status ? (
-
-                                                        <span
-                                                            className={`badge ${getStatusBadge(
-                                                                item.status
-                                                            )}`}
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-sm btn-success"
+                                                            onClick={() =>
+                                                                handleCheckIn(
+                                                                    item.employeeId
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                actionLoading
+                                                            }
                                                         >
 
-                                                            {
-                                                                item.status
-                                                            }
+                                                            <i className="bi bi-box-arrow-in-right me-1"></i>
 
-                                                        </span>
+                                                            Check In
 
-                                                    ) : (
-
-                                                        <span className="badge bg-secondary">
-                                                            Not Marked
-                                                        </span>
-
+                                                        </button>
                                                     )}
 
-                                                </td>
 
-
-                                                {/* LATE */}
-
-                                                <td>
-
-                                                    {item.late === true ? (
-
-                                                        <span className="badge bg-danger">
-                                                            Late
-                                                        </span>
-
-                                                    ) : item.late === false ? (
-
-                                                        <span className="badge bg-success">
-                                                            On Time
-                                                        </span>
-
-                                                    ) : (
-
-                                                        <span className="text-muted">
-                                                            -
-                                                        </span>
-
-                                                    )}
-
-                                                </td>
-
-
-                                                {/* OVERTIME */}
-
-                                                <td>
-
-                                                    {formatHours(
-                                                        item.overtimeHours
-                                                    )}
-
-                                                </td>
-
-
-                                                {/* ACTIONS */}
-
-                                                <td>
-
-                                                    <div className="d-flex justify-content-center">
-
-                                                        {/* NOT CHECKED IN */}
-
-                                                        {!item.checkIn && (
+                                                    {item.checkIn &&
+                                                        !item.checkOut && (
 
                                                             <button
                                                                 type="button"
-                                                                className="btn btn-sm btn-success"
+                                                                className="btn btn-sm btn-danger"
                                                                 onClick={() =>
-                                                                    handleCheckIn(
+                                                                    handleCheckOut(
                                                                         item.employeeId
                                                                     )
                                                                 }
@@ -819,64 +1403,30 @@ function Attendance() {
                                                                 }
                                                             >
 
-                                                                <i className="bi bi-box-arrow-in-right me-1"></i>
+                                                                <i className="bi bi-box-arrow-right me-1"></i>
 
-                                                                Check In
+                                                                Check Out
 
                                                             </button>
-
                                                         )}
 
 
-                                                        {/* CHECKED IN BUT NOT CHECKED OUT */}
+                                                    {item.checkIn &&
+                                                        item.checkOut && (
 
-                                                        {item.checkIn &&
-                                                            !item.checkOut && (
+                                                            <span className="badge bg-secondary">
 
-                                                                <button
-                                                                    type="button"
-                                                                    className="btn btn-sm btn-danger"
-                                                                    onClick={() =>
-                                                                        handleCheckOut(
-                                                                            item.employeeId
-                                                                        )
-                                                                    }
-                                                                    disabled={
-                                                                        actionLoading
-                                                                    }
-                                                                >
+                                                                Completed
 
-                                                                    <i className="bi bi-box-arrow-right me-1"></i>
+                                                            </span>
+                                                        )}
 
-                                                                    Check Out
+                                                </div>
 
-                                                                </button>
+                                            </td>
 
-                                                            )}
-
-
-                                                        {/* COMPLETED */}
-
-                                                        {item.checkIn &&
-                                                            item.checkOut && (
-
-                                                                <span className="badge bg-secondary">
-
-                                                                    Completed
-
-                                                                </span>
-
-                                                            )}
-
-                                                    </div>
-
-                                                </td>
-
-                                            </tr>
-
-                                        )
-                                    )
-
+                                        </tr>
+                                    ))
                                 )}
 
                             </tbody>
